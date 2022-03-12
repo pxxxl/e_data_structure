@@ -4,21 +4,22 @@
 
 /*
  * 声明：
- * 若发生忽略status值引起的空引用等错误，本人不承担连带责任
- * 本库所有函数及方法均会返回status值，多返回值使用tuple，其中status值是最后一个返回值
- * 本库不处理错误，只设置status值，请调用者使用本库自带的 handle(status) 检验返回的status
+ * 忽略status值可能引起空引用等错误。
+ * 本库所有函数及方法均会返回status值。多返回值使用tuple，其中status值是最后一个返回值。
+ * 本库不处理错误，只设置status值，请调用者使用本库自带的 handle(status) 检验返回的status。
 */
 
 namespace eds {
 
 constexpr unsigned INIT_SIZE = 4;
+constexpr double EXPAND_RATE = 1.5;
 
 template<typename T>
 class vector;
 
 //返回一个已经初始化的线性表
 template<typename T>
-std::tuple<vector<T>, status> init_list();
+std::tuple<vector<T>, status> init_vector();
 
 template<typename T>
 class vector {
@@ -42,12 +43,10 @@ public:
 	 std::tuple<T&, status> next_item(const T&);
 	 //将元素插入到某位置上（拷贝构造）
 	 status list_insert(T, unsigned);
-	 //将元素插入到某位置上（右值引用）
-	 status list_insert(T&&, unsigned);
 	 //删除给定位置上的元素
 	 std::tuple<T&, status> list_delete(unsigned);
 	 //对list的每个对象调用传入的函数
-	 status list_traverse(std::function<status(T&)>);
+	 status list_traverse(std::function<bool(T&)>);
 private:
 	unsigned cap;
 	unsigned len;
@@ -60,7 +59,7 @@ private:
 //声明结束
 
 template<typename T>
-inline std::tuple<vector<T>&, status> init_list() {
+inline std::tuple<vector<T>&, status> init_vector() {
 	vector<T> vec();
 	vec.head = new T[INIT_SIZE];
 	if (vec.head == nullptr) {
@@ -86,9 +85,26 @@ inline status vector<T>::clear_list() {
 }
 
 template<typename T>
+inline std::tuple<bool, status> vector<T>::list_empty()
+{
+	if (len == 0) {
+		return make_tuple<bool, status>(false, OK);
+	}
+	else {
+		return make_tuple<bool, status>(true, OK);
+	}
+}
+
+template<typename T>
+inline std::tuple<unsigned, status> vector<T>::list_length()
+{
+	return std::make_tuple<unsigned, status>(len, OK);
+}
+
+template<typename T>
 inline std::tuple<T&, status> vector<T>::get_item(unsigned n){
-	if (n < this->len && n >= 0) {
-		return std::make_tuple<T&, status>((this->head)[n], OK);
+	if (n < len && n >= 0) {
+		return std::make_tuple<T&, status>(head[n], OK);
 	}
 	else {
 		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
@@ -97,8 +113,8 @@ inline std::tuple<T&, status> vector<T>::get_item(unsigned n){
 
 template<typename T>
 inline std::tuple<unsigned, status> vector<T>::locate_item(const T& sample, std::function<bool(const T&, const T&)> func){
-	for (int i = 0, bool ok = false; i < this->len; i++) {
-		if (func(sample, (this->head)[i])) {
+	for (unsigned i = 0, bool ok = false; i < len; i++) {
+		if (func(sample, head[i])) {
 			return std::make_tuple<unsigned, status>(i, OK);
 		}
 	}
@@ -110,12 +126,12 @@ inline std::tuple<T&, status> vector<T>::prior_item(const T& sample){
 	if (len == 0) {
 		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
 	}
-	if (sample == (this->head)[0]) {
+	if (sample == (head)[0]) {
 		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
 	}
-	for (int i = 1; i < len; i++) {
-		if (sample == (this->head)[i]) {
-			return std::make_tuple<T&, status>((this->head)[i-1], OK);
+	for (unsigned i = 1; i < len; i++) {
+		if (sample == (head)[i]) {
+			return std::make_tuple<T&, status>((head)[i-1], OK);
 		}
 	}
 	return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
@@ -124,18 +140,73 @@ inline std::tuple<T&, status> vector<T>::prior_item(const T& sample){
 template<typename T>
 inline std::tuple<T&, status> vector<T>::next_item(const T& sample)
 {
-	if (this->len == 0) {
+	if (len == 0) {
 		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
 	}
-	if (sample == (this->head)[this->len - 1]) {
+	if (sample == head[this->len - 1]) {
 		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
 	}
-	for (int i = 0; i < len - 1; i++) {
-		if (sample == (this->head)[i]) {
+	for (unsigned i = 0; i < len - 1; i++) {
+		if (sample == head[i]) {
 			return std::make_tuple<T&, status>((this->head)[i + 1], OK);
 		}
 	}
 	return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
+}
+
+template<typename T>
+inline status vector<T>::list_insert(T sample, unsigned n){
+	if (n >= len || n < 0) {
+		return INFEASIBLE;
+	}
+	if (len == cap) {
+		new_cap = cap * EXPAND_RATE;
+		if (new_cap < cap) {
+			return OVERFLOWED;
+		}
+		T* new_head = new T[new_cap];
+		for (unsigned i = len - 1; i >= n; i--) {
+			new_head[i + 1] = head[i];
+		}
+		new_head[n] = sample;
+		for (unsigned i = n - 1; i < 0; i--) {
+			new_head[i] = head[i];
+		}
+	}
+	else {
+		for (unsigned i = len; i <= n; i--) {
+			head[i] = head[i - 1];
+		}
+		head[n] = sample;
+	}
+	return OK;
+}
+
+template<typename T>
+inline std::tuple<T&, status> vector<T>::list_delete(unsigned n)
+{
+	if (n >= len || n < 0) {
+		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
+	}
+	T& copy = head[n];
+	for (unsigned i = n; i < len - 1; i++) {
+		head[i] = head[i + 1];
+	}
+	len--;
+	return std::make_tuple<T&, status>(copy, OK);
+}
+
+template<typename T>
+inline status vector<T>::list_traverse(std::function<bool(T&)> func)
+{
+	bool sta;
+	for (unsigned i = 0; i < len; i++) {
+		sta = func(head[i]);
+		if (sta != true) {
+			return INFEASIBLE;
+		}
+	}
+	return OK;
 }
 
 }
