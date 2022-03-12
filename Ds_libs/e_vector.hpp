@@ -17,14 +17,11 @@ constexpr double EXPAND_RATE = 1.5;
 template<typename T>
 class vector;
 
-//返回一个已经初始化的线性表
-template<typename T>
-std::tuple<vector<T>, status> init_vector();
-
 template<typename T>
 class vector {
-	friend std::tuple<vector<T>, status> init_list();
 public:
+	 //初始化vector
+	 vector(status&);
 	 //销毁线性表，调用后不应再对vector的值做任何假设，请将其丢掉
 	 status destroy_list();
 	 //清除线性表的数据（不清除分配的空间）
@@ -48,26 +45,28 @@ public:
 	 //对list的每个对象调用传入的函数
 	 status list_traverse(std::function<bool(T&)>);
 private:
-	unsigned cap;
-	unsigned len;
-	T* head;
+	unsigned cap = 0;
+	unsigned len = 0;
+	T* head = nullptr;
 
 	vector();
 	vector(const vector&);
-	~vector();
+
+	int nul_reference = 0;
 };
 //声明结束
 
 template<typename T>
-inline std::tuple<vector<T>&, status> init_vector() {
-	vector<T> vec();
-	vec.head = new T[INIT_SIZE];
-	if (vec.head == nullptr) {
-		return std::make_tuple < vector<T>&, status>(vec, OVERFLOWED);
+inline vector<T>::vector(status& sta) {
+	head = new T[INIT_SIZE];
+	if (head == nullptr) {
+		sta = OVERFLOWED;
+		return;
 	}
-	vec.cap = INIT_SIZE;
-	vec.len = 0;
-	return std::make_tuple < vector<T>&, status>(vec, OK);
+	cap = INIT_SIZE;
+	len = 0;
+	sta = OK;
+	return;
 }
 
 template<typename T>
@@ -88,26 +87,26 @@ template<typename T>
 inline std::tuple<bool, status> vector<T>::list_empty()
 {
 	if (len == 0) {
-		return make_tuple<bool, status>(false, OK);
+		return std::tuple< bool, status>(false, OK);
 	}
 	else {
-		return make_tuple<bool, status>(true, OK);
+		return std::tuple< bool, status>(true, OK);
 	}
 }
 
 template<typename T>
 inline std::tuple<unsigned, status> vector<T>::list_length()
 {
-	return std::make_tuple<unsigned, status>(len, OK);
+	return std::tuple<unsigned, status>(len, OK);
 }
 
 template<typename T>
 inline std::tuple<T&, status> vector<T>::get_item(unsigned n){
 	if (n < len && n >= 0) {
-		return std::make_tuple<T&, status>(head[n], OK);
+		return std::tuple<T&, status>(head[n], OK);
 	}
 	else {
-		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
+		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
 	}
 }
 
@@ -115,43 +114,43 @@ template<typename T>
 inline std::tuple<unsigned, status> vector<T>::locate_item(const T& sample, std::function<bool(const T&, const T&)> func){
 	for (unsigned i = 0, bool ok = false; i < len; i++) {
 		if (func(sample, head[i])) {
-			return std::make_tuple<unsigned, status>(i, OK);
+			return std::tuple<unsigned, status>(i, OK);
 		}
 	}
-	return std::make_tuple<unsigned, status>(0, INFEASIBLE);
+	return std::tuple<unsigned, status>(0, INFEASIBLE);
 }
 
 template<typename T>
 inline std::tuple<T&, status> vector<T>::prior_item(const T& sample){
 	if (len == 0) {
-		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
+		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
 	}
 	if (sample == (head)[0]) {
-		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
+		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
 	}
 	for (unsigned i = 1; i < len; i++) {
 		if (sample == (head)[i]) {
-			return std::make_tuple<T&, status>((head)[i-1], OK);
+			return std::tuple<T&, status>((head)[i-1], OK);
 		}
 	}
-	return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
+	return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
 }
 
 template<typename T>
 inline std::tuple<T&, status> vector<T>::next_item(const T& sample)
 {
 	if (len == 0) {
-		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
+		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
 	}
 	if (sample == head[this->len - 1]) {
-		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
+		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
 	}
 	for (unsigned i = 0; i < len - 1; i++) {
 		if (sample == head[i]) {
-			return std::make_tuple<T&, status>((this->head)[i + 1], OK);
+			return std::tuple<T&, status>((this->head)[i + 1], OK);
 		}
 	}
-	return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
+	return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
 }
 
 template<typename T>
@@ -160,7 +159,7 @@ inline status vector<T>::list_insert(T sample, unsigned n){
 		return INFEASIBLE;
 	}
 	if (len == cap) {
-		new_cap = cap * EXPAND_RATE;
+		unsigned new_cap = cap * EXPAND_RATE;
 		if (new_cap < cap) {
 			return OVERFLOWED;
 		}
@@ -186,14 +185,14 @@ template<typename T>
 inline std::tuple<T&, status> vector<T>::list_delete(unsigned n)
 {
 	if (n >= len || n < 0) {
-		return std::make_tuple<T&, status>(static_cast<T&>(nullptr), INFEASIBLE);
+		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
 	}
 	T& copy = head[n];
 	for (unsigned i = n; i < len - 1; i++) {
 		head[i] = head[i + 1];
 	}
 	len--;
-	return std::make_tuple<T&, status>(copy, OK);
+	return std::tuple<T&, status>(copy, OK);
 }
 
 template<typename T>
