@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="e_list.hpp" />
     <ClInclude Include="e_vector.hpp" />
     <ClInclude Include="settings.hpp" />
   </ItemGroup>

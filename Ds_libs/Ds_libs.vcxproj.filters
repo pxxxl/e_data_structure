@@ -21,5 +21,8 @@
     <ClInclude Include="settings.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="e_list.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
