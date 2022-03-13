@@ -2,13 +2,6 @@
 
 #include"settings.hpp"
 
-/*
- * 声明：
- * 忽略status值可能引起空引用等错误。
- * 本库所有函数及方法均会返回status值。多返回值使用tuple，其中status值是最后一个返回值。
- * 本库不处理错误，只设置status值，请调用者使用本库自带的 handle(status) 检验返回的status。
-*/
-
 namespace eds {
 
 constexpr unsigned INIT_SIZE = 4;
@@ -21,147 +14,141 @@ template<typename T>
 class vector {
 public:
 	 //初始化vector
-	 vector(status&);
+	 vector();
 	 //销毁线性表，调用后不应再对vector的值做任何假设，请将其丢掉
-	 status destroy_list();
+	 void destroy_list() noexcept;
 	 //清除线性表的数据（不清除分配的空间）
-	 status clear_list();
+	 void clear_list() noexcept;
 	 //返回list是否为空
-	 std::tuple<bool, status> list_empty();
+	 bool list_empty() noexcept;
 	 //返回list长度
-	 std::tuple<unsigned, status> list_length();
+	 unsigned list_length() noexcept;
 	 //获取线性表的元素
-	 std::tuple<T&, status> get_item(unsigned);
+	 T& get_item(unsigned);
 	 //返回list中第一个与传入元素满足compare关系的元素的序号，调用时，func(传入的元素, list中元素)
-	 std::tuple<unsigned, status> locate_item(const T&, std::function<bool(const T&, const T&)>);
+	 std::optional<unsigned> locate_item(const T&, std::function<bool(const T&, const T&)>) noexcept;
 	 //返回给定元素的前驱
-	 std::tuple<T&, status> prior_item(const T&);
+	 std::optional<T&> prior_item(const T&) noexcept;
 	 //返回给定元素的后继
-	 std::tuple<T&, status> next_item(const T&);
-	 //将元素插入到某位置上（拷贝构造）
-	 status list_insert(T, unsigned);
+	 std::optional<T&> next_item(const T&) noexcept;
+	 //将元素插入到某位置上
+	 void list_insert(T, unsigned);
 	 //删除给定位置上的元素
-	 std::tuple<T&, status> list_delete(unsigned);
+	 std::optional<T&> list_delete(unsigned);
 	 //对list的每个对象调用传入的函数
-	 status list_traverse(std::function<bool(T&)>);
+	 void list_traverse(std::function<bool(T&)>) noexcept;
 private:
 	unsigned cap = 0;
 	unsigned len = 0;
 	T* head = nullptr;
 
-	vector();
 	vector(const vector&);
 
-	int nul_reference = 0;
 };
 //声明结束
 
 template<typename T>
-inline vector<T>::vector(status& sta) {
+vector<T>::vector() {
 	head = new T[INIT_SIZE];
 	if (head == nullptr) {
-		sta = OVERFLOWED;
 		return;
 	}
 	cap = INIT_SIZE;
 	len = 0;
-	sta = OK;
 	return;
 }
 
 template<typename T>
-inline status vector<T>::destroy_list() {
+inline void vector<T>::destroy_list() noexcept {
 	this->cap = 0;
 	this->len = 0;
 	delete[](this->head);
-	return OK;
+	return;
 }
 
 template<typename T>
-inline status vector<T>::clear_list() {
+inline void vector<T>::clear_list() noexcept {
 	this->len = 0;
-	return OK;
+	return;
 }
 
 template<typename T>
-inline std::tuple<bool, status> vector<T>::list_empty()
-{
+inline bool vector<T>::list_empty() noexcept{
 	if (len == 0) {
-		return std::tuple< bool, status>(false, OK);
+		return false;
 	}
 	else {
-		return std::tuple< bool, status>(true, OK);
+		return true;
 	}
 }
 
 template<typename T>
-inline std::tuple<unsigned, status> vector<T>::list_length()
-{
-	return std::tuple<unsigned, status>(len, OK);
+inline unsigned vector<T>::list_length() noexcept {
+	return len;
 }
 
 template<typename T>
-inline std::tuple<T&, status> vector<T>::get_item(unsigned n){
+inline T& vector<T>::get_item(unsigned n){
+	if (n >= len) {
+		throw std::out_of_range("from vector::get_item : n >= len");
+	}
 	if (n < len && n >= 0) {
-		return std::tuple<T&, status>(head[n], OK);
-	}
-	else {
-		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
+		return head[n];
 	}
 }
 
 template<typename T>
-inline std::tuple<unsigned, status> vector<T>::locate_item(const T& sample, std::function<bool(const T&, const T&)> func){
+inline std::optional<unsigned> vector<T>::locate_item(const T& sample, std::function<bool(const T&, const T&)> func) noexcept{
 	for (unsigned i = 0, bool ok = false; i < len; i++) {
 		if (func(sample, head[i])) {
-			return std::tuple<unsigned, status>(i, OK);
+			return i;
 		}
 	}
-	return std::tuple<unsigned, status>(0, INFEASIBLE);
+	return std::nullopt;
 }
 
 template<typename T>
-inline std::tuple<T&, status> vector<T>::prior_item(const T& sample){
+inline std::optional<T&> vector<T>::prior_item(const T& sample) noexcept {
 	if (len == 0) {
-		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
+		return std::nullopt;
 	}
 	if (sample == (head)[0]) {
-		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
+		return std::nullopt;
 	}
 	for (unsigned i = 1; i < len; i++) {
 		if (sample == (head)[i]) {
-			return std::tuple<T&, status>((head)[i-1], OK);
+			return head[i-1];
 		}
 	}
-	return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
+	return std::nullopt;
 }
 
 template<typename T>
-inline std::tuple<T&, status> vector<T>::next_item(const T& sample)
+inline std::optional<T&> vector<T>::next_item(const T& sample)
 {
 	if (len == 0) {
-		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
+		return std::nullopt;
 	}
 	if (sample == head[this->len - 1]) {
-		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
+		return std::nullopt;
 	}
 	for (unsigned i = 0; i < len - 1; i++) {
 		if (sample == head[i]) {
-			return std::tuple<T&, status>((this->head)[i + 1], OK);
+			return head[i + 1];
 		}
 	}
-	return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
+	return std::nullopt;
 }
 
 template<typename T>
-inline status vector<T>::list_insert(T sample, unsigned n){
-	if (n >= len || n < 0) {
-		return INFEASIBLE;
+inline void vector<T>::list_insert(T sample, unsigned n){
+	if (n >= len) {
+		throw std::out_of_range("from vector::list_insert : n >= len");
 	}
 	if (len == cap) {
 		unsigned new_cap = cap * EXPAND_RATE;
 		if (new_cap < cap) {
-			return OVERFLOWED;
+			throw std::overflow_error("from vector::list_insert : multiple overflow");
 		}
 		T* new_head = new T[new_cap];
 		for (unsigned i = len - 1; i >= n; i--) {
@@ -178,34 +165,34 @@ inline status vector<T>::list_insert(T sample, unsigned n){
 		}
 		head[n] = sample;
 	}
-	return OK;
+	return;
 }
 
 template<typename T>
-inline std::tuple<T&, status> vector<T>::list_delete(unsigned n)
+inline std::optional<T&> vector<T>::list_delete(unsigned n)
 {
 	if (n >= len || n < 0) {
-		return std::tuple<T&, status>(static_cast<T&>(nul_reference), INFEASIBLE);
+		return std::nullopt;
 	}
 	T& copy = head[n];
 	for (unsigned i = n; i < len - 1; i++) {
 		head[i] = head[i + 1];
 	}
 	len--;
-	return std::tuple<T&, status>(copy, OK);
+	return copy;
 }
 
 template<typename T>
-inline status vector<T>::list_traverse(std::function<bool(T&)> func)
+inline void vector<T>::list_traverse(std::function<bool(T&)> func)
 {
-	bool sta;
+	bool state;
 	for (unsigned i = 0; i < len; i++) {
-		sta = func(head[i]);
-		if (sta != true) {
-			return INFEASIBLE;
+		state = func(head[i]);
+		if (state != true) {
+			throw std::runtime_error("from vector::list_traverse : function returns false");
 		}
 	}
-	return OK;
+	return;
 }
 
 }

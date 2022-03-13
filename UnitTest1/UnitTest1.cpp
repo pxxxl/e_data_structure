@@ -12,11 +12,7 @@ namespace UnitTest1
 		
 		TEST_METHOD(TestMethod1)
 		{
-			eds::status errcode = eds::OK;
-			eds::vector<int> vec(errcode);
-			vec.list_insert(1, 0);
-			auto[num, errcode] = vec.get_item(0);
-			
+		
 		}
 	};
 }
