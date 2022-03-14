@@ -3,8 +3,11 @@
 
 随课程进度更新
 
-下载源码：右边package
+下载源码：右边release
 
 进度：
+
 0.设定              文件: settings.hpp
+
 1.线性表——数组实现   文件: e_vector.hpp
+
