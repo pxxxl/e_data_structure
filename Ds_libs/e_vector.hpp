@@ -8,9 +8,6 @@ constexpr unsigned INIT_SIZE = 4;
 constexpr double EXPAND_RATE = 1.5;
 
 template<typename T>
-class vector;
-
-template<typename T>
 class vector {
 public:
 	 //初始化vector
@@ -20,23 +17,25 @@ public:
 	 //清除线性表的数据（不清除分配的空间）
 	 void clear_list() noexcept;
 	 //返回list是否为空
-	 bool list_empty() noexcept;
+	 bool list_empty() const noexcept;
 	 //返回list长度
-	 unsigned list_length() noexcept;
+	 unsigned list_length() const noexcept;
 	 //获取线性表的元素
-	 T& get_item(unsigned);
+	 T& get_item(unsigned) const;
 	 //返回list中第一个与传入元素满足compare关系的元素的序号，调用时，func(传入的元素, list中元素)
-	 std::optional<unsigned> locate_item(const T&, std::function<bool(const T&, const T&)>) noexcept;
+	 std::optional<unsigned> locate_item(const T&, std::function<bool(const T&, const T&)>) const noexcept;
 	 //返回给定元素的前驱
-	 std::optional<T&> prior_item(const T&) noexcept;
+	 std::optional<T&> prior_item(const T&) const noexcept;
 	 //返回给定元素的后继
-	 std::optional<T&> next_item(const T&) noexcept;
+	 std::optional<T&> next_item(const T&) const noexcept;
 	 //将元素插入到某位置上
 	 void list_insert(T, unsigned);
 	 //删除给定位置上的元素
 	 std::optional<T&> list_delete(unsigned);
 	 //对list的每个对象调用传入的函数
 	 void list_traverse(std::function<bool(T&)>) noexcept;
+	 //重载[]
+	 T& operator[]() const;
 private:
 	unsigned cap = 0;
 	unsigned len = 0;
@@ -51,6 +50,7 @@ template<typename T>
 vector<T>::vector() {
 	head = new T[INIT_SIZE];
 	if (head == nullptr) {
+		throw std::runtime_error("from vector() : cannot alloc memory");
 		return;
 	}
 	cap = INIT_SIZE;
@@ -73,7 +73,7 @@ inline void vector<T>::clear_list() noexcept {
 }
 
 template<typename T>
-inline bool vector<T>::list_empty() noexcept{
+inline bool vector<T>::list_empty() const noexcept{
 	if (len == 0) {
 		return false;
 	}
@@ -83,12 +83,12 @@ inline bool vector<T>::list_empty() noexcept{
 }
 
 template<typename T>
-inline unsigned vector<T>::list_length() noexcept {
+inline unsigned vector<T>::list_length() const noexcept {
 	return len;
 }
 
 template<typename T>
-inline T& vector<T>::get_item(unsigned n){
+inline T& vector<T>::get_item(unsigned n) const{
 	if (n >= len) {
 		throw std::out_of_range("from vector::get_item : n >= len");
 	}
@@ -98,7 +98,7 @@ inline T& vector<T>::get_item(unsigned n){
 }
 
 template<typename T>
-inline std::optional<unsigned> vector<T>::locate_item(const T& sample, std::function<bool(const T&, const T&)> func) noexcept{
+inline std::optional<unsigned> vector<T>::locate_item(const T& sample, std::function<bool(const T&, const T&)> func) const noexcept{
 	for (unsigned i = 0, bool ok = false; i < len; i++) {
 		if (func(sample, head[i])) {
 			return i;
@@ -108,7 +108,7 @@ inline std::optional<unsigned> vector<T>::locate_item(const T& sample, std::func
 }
 
 template<typename T>
-inline std::optional<T&> vector<T>::prior_item(const T& sample) noexcept {
+inline std::optional<T&> vector<T>::prior_item(const T& sample) const noexcept {
 	if (len == 0) {
 		return std::nullopt;
 	}
@@ -124,8 +124,7 @@ inline std::optional<T&> vector<T>::prior_item(const T& sample) noexcept {
 }
 
 template<typename T>
-inline std::optional<T&> vector<T>::next_item(const T& sample)
-{
+inline std::optional<T&> vector<T>::next_item(const T& sample) const{
 	if (len == 0) {
 		return std::nullopt;
 	}
@@ -193,6 +192,11 @@ inline void vector<T>::list_traverse(std::function<bool(T&)> func)
 		}
 	}
 	return;
+}
+
+template<typename T>
+inline T& vector<T>::operator[]() const{
+	
 }
 
 }
