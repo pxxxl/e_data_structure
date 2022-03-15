@@ -19,8 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="e_d_list.hpp" />
     <ClInclude Include="e_list.hpp" />
+    <ClInclude Include="e_stack.hpp" />
     <ClInclude Include="e_vector.hpp" />
+    <ClInclude Include="interface_linear_list.hpp" />
+    <ClInclude Include="matrix.hpp" />
     <ClInclude Include="settings.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

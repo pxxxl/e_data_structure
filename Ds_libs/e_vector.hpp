@@ -12,8 +12,6 @@ class vector {
 public:
 	 //初始化vector
 	 vector();
-	 //销毁线性表，调用后不应再对vector的值做任何假设，请将其丢掉
-	 void destroy_list() noexcept;
 	 //清除线性表的数据（不清除分配的空间）
 	 void clear_list() noexcept;
 	 //返回list是否为空
@@ -23,23 +21,26 @@ public:
 	 //获取线性表的元素
 	 T& get_item(unsigned) const;
 	 //返回list中第一个与传入元素满足compare关系的元素的序号，调用时，func(传入的元素, list中元素)
-	 std::optional<unsigned> locate_item(const T&, std::function<bool(const T&, const T&)>) const noexcept;
+	 std::tuple<unsigned, status> locate_item(const T&, std::function<bool(const T&, const T&)>) const noexcept;
 	 //返回给定元素的前驱
-	 std::optional<T&> prior_item(const T&) const noexcept;
+	 std::tuple<T&, status> prior_item(const T&) const noexcept;
 	 //返回给定元素的后继
-	 std::optional<T&> next_item(const T&) const noexcept;
+	 std::tuple<T&, status> next_item(const T&) const noexcept;
 	 //将元素插入到某位置上
 	 void list_insert(T, unsigned);
-	 //删除给定位置上的元素
-	 std::optional<T&> list_delete(unsigned);
+	 //删除给定位置上的元素（错了，不该传引用）
+	 std::tuple<T&, status> list_delete(unsigned);
 	 //对list的每个对象调用传入的函数
-	 void list_traverse(std::function<bool(T&)>) noexcept;
-	 //重载[]
-	 T& operator[]() const;
+	 void list_traverse(std::function<void(T&)>) noexcept;
+	 //尾插入
+	 void push_back(T);
+	 //析构
+	 ~vector();
 private:
 	unsigned cap = 0;
 	unsigned len = 0;
 	T* head = nullptr;
+	T n_obj;
 
 	vector(const vector&);
 
@@ -55,14 +56,6 @@ vector<T>::vector() {
 	}
 	cap = INIT_SIZE;
 	len = 0;
-	return;
-}
-
-template<typename T>
-inline void vector<T>::destroy_list() noexcept {
-	this->cap = 0;
-	this->len = 0;
-	delete[](this->head);
 	return;
 }
 
@@ -98,33 +91,33 @@ inline T& vector<T>::get_item(unsigned n) const{
 }
 
 template<typename T>
-inline std::optional<unsigned> vector<T>::locate_item(const T& sample, std::function<bool(const T&, const T&)> func) const noexcept{
+inline std::tuple<unsigned, status> vector<T>::locate_item(const T& sample, std::function<bool(const T&, const T&)> func) const noexcept{
 	for (unsigned i = 0, bool ok = false; i < len; i++) {
 		if (func(sample, head[i])) {
-			return i;
+			return std::tuple(i, OK);
 		}
 	}
-	return std::nullopt;
+	return std::tuple(0u, INFEASIBLE);
 }
 
 template<typename T>
-inline std::optional<T&> vector<T>::prior_item(const T& sample) const noexcept {
+inline std::tuple<T&, status> vector<T>::prior_item(const T& sample) const noexcept {
 	if (len == 0) {
-		return std::nullopt;
+		return std::tie(n_obj, INFEASIBLE);
 	}
 	if (sample == (head)[0]) {
-		return std::nullopt;
+		return std::tuple(n_obj, INFEASIBLE);
 	}
 	for (unsigned i = 1; i < len; i++) {
 		if (sample == (head)[i]) {
-			return head[i-1];
+			return std::tuple(head[i - 1], INFEASIBLE);
 		}
 	}
-	return std::nullopt;
+	return std::tuple(n_obj, INFEASIBLE);
 }
 
 template<typename T>
-inline std::optional<T&> vector<T>::next_item(const T& sample) const{
+inline std::tuple<T&, status> vector<T>::next_item(const T& sample) const{
 	if (len == 0) {
 		return std::nullopt;
 	}
@@ -168,7 +161,7 @@ inline void vector<T>::list_insert(T sample, unsigned n){
 }
 
 template<typename T>
-inline std::optional<T&> vector<T>::list_delete(unsigned n)
+inline std::tuple<T&, status> vector<T>::list_delete(unsigned n)
 {
 	if (n >= len || n < 0) {
 		return std::nullopt;
@@ -195,8 +188,13 @@ inline void vector<T>::list_traverse(std::function<bool(T&)> func)
 }
 
 template<typename T>
-inline T& vector<T>::operator[]() const{
-	
+inline vector<T>::~vector()
+{
+	this->cap = 0;
+	this->len = 0;
+	delete[](this->head);
+	return;
 }
+
 
 }
