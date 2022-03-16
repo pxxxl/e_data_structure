@@ -57,19 +57,3 @@ public:
 };
 
 }
-
-/*
-void clear_list() noexcept;
-bool list_empty() const noexcept;
-unsigned list_length() const noexcept;
-T& get_item(unsigned n) const = 0;
-std::tuple<unsigned, status> locate_item(const T& sample, std::function<bool(const T& sample, const T& tested)> func) const noexcept;
-std::tuple<T&, status> prior_item(const T& sample) const noexcept;
-std::tuple<T&, status> next_item(const T& sample) const noexcept;
-void list_insert(T inserted, unsigned n);
-void list_delete(unsigned n);
-void list_traverse(std::function<void(T& element)> func) noexcept;
-void push_back(T inserted);
-void insert_front(T inserted);
-~linear_list() {};
-*/

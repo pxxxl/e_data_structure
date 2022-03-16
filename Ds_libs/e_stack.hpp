@@ -27,7 +27,7 @@ public:
 	unsigned stack_length() const noexcept;
 
 	//get the top element of the stack
-	T& get_top() const noexcept;
+	T& get_top() const;
 
 	//push the object into the stack
 	void push(T object);
@@ -92,8 +92,11 @@ inline unsigned l_stack<T>::stack_length() const noexcept
 }
 
 template<typename T>
-inline T& l_stack<T>::get_top() const noexcept
+inline T& l_stack<T>::get_top() const
 {
+	if (size == 0) {
+		throw std::runtime_error("From eds::l_stack::get_top : stack empty");
+	}
 	return top_cur->data;
 }
 

@@ -17,7 +17,7 @@ public:
 	virtual unsigned stack_length() const noexcept = 0;
 
 	//get the top element of the stack
-	virtual T& get_top() const noexcept = 0;
+	virtual T& get_top() const = 0;
 
 	//push the object into the stack
 	virtual void push(T object) = 0;
@@ -33,14 +33,3 @@ public:
 };
 
 }
-
-/*
-void clear_stack() noexcept;
-bool stack_empty() const noexcept;
-unsigned stack_length() const noexcept;
-const T& get_top() const noexcept;
-void push(T) = 0;
-T pop() noexcept = 0;
- void stack_traverse(std::function<void(T& element)> func);
-~stack() = 0;
-*/
