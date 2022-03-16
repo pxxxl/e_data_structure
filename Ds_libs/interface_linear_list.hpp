@@ -7,32 +7,69 @@ namespace eds {
 template<typename T>
 class linear_list {
 public:
-	//清除线性表的数据（不清除分配的空间）
+	//clear the data in the linear list
 	virtual void clear_list() noexcept = 0;
-	//返回list是否为空
+
+	//if the list is empty, return false
 	virtual bool list_empty() const noexcept = 0;
-	//返回list长度
+
+	//return the length of the list
 	virtual unsigned list_length() const noexcept = 0;
-	//获取线性表的元素引用
-	virtual T& get_item(unsigned) const = 0;
-	//返回list中第一个与传入元素满足compare关系的元素的序号，调用时，func(传入的元素, list中元素)
-	virtual std::tuple<unsigned, status> locate_item(const T&, std::function<bool(const T&, const T&)>) const noexcept = 0;
-	//返回给定元素的前驱
-	virtual std::tuple<T&, status> prior_item(const T&) const noexcept = 0;
-	//返回给定元素的后继
-	virtual std::tuple<T&, status> next_item(const T&) const noexcept = 0;
-	//将元素插入到某位置上
-	virtual void list_insert(T, unsigned) = 0;
-	//删除给定位置上的元素（错了，不该传引用）
-	virtual void list_delete(unsigned) = 0;
-	//对list的每个对象调用传入的函数
-	virtual void list_traverse(std::function<void(T&)>) noexcept = 0;
-	//尾插入
-	virtual void push_back(T) = 0;
-	//头插入
-	virtual void insert_front(T) = 0;
-	//析构
-	virtual ~linear_list() = 0;
+
+	//get the Lvalue reference of the linear list
+	//make sure len > n >= 0
+	virtual T& get_item(unsigned n) const = 0;
+
+	//find the first element causing func(sample, tested) to return true, and return its serial number.
+	//status == eds_m::OK  :  founded
+	//status == eds_m::INFEASIBLE  :  not found
+	virtual std::tuple<unsigned, status> locate_item(const T& sample, std::function<bool(const T& sample, const T& tested)> func) const = 0;
+
+	//return the former element of the sample
+	//status == eds_m::OK  :  founded
+	//status == eds_m::INFEASIBLE  :  not found
+	virtual std::tuple<T&, status> prior_item(const T& sample) const noexcept = 0;
+
+	//return the latter element of the sample
+	//status == eds_m::OK  :  founded
+	//status == eds_m::INFEASIBLE  :  not found
+	virtual std::tuple<T&, status> next_item(const T& sample) const noexcept = 0;
+
+	//insert the element to linear_list[n]
+	//make sure len >= n >= 0
+	virtual void list_insert(T inserted, unsigned n) = 0;
+
+	//delete the element linear_list[n]
+	//make sure len > n >= 0
+	virtual void list_delete(unsigned n) = 0;
+
+	//call func(element) on each element in the linear list
+	virtual void list_traverse(std::function<void(T& element)> func) = 0;
+
+	//insert the element to the tail of the linear list
+	virtual void push_back(T inserted) = 0;
+
+	//insert the element to the head of the linear list
+	virtual void insert_front(T inserted) = 0;
+
+	//destructor
+	virtual ~linear_list() {};
 };
 
 }
+
+/*
+void clear_list() noexcept;
+bool list_empty() const noexcept;
+unsigned list_length() const noexcept;
+T& get_item(unsigned n) const = 0;
+std::tuple<unsigned, status> locate_item(const T& sample, std::function<bool(const T& sample, const T& tested)> func) const noexcept;
+std::tuple<T&, status> prior_item(const T& sample) const noexcept;
+std::tuple<T&, status> next_item(const T& sample) const noexcept;
+void list_insert(T inserted, unsigned n);
+void list_delete(unsigned n);
+void list_traverse(std::function<void(T& element)> func) noexcept;
+void push_back(T inserted);
+void insert_front(T inserted);
+~linear_list() {};
+*/

@@ -88,10 +88,10 @@ inline std::tuple<unsigned, status> list<T>::locate_item(const T& sample, std::f
 	for (l_node<T>* cur = head; cur != nullptr; cur = cur->next, index++) {
 		flag = func(sample, cur->data);
 		if (flag == true) {
-			return std::tuple<unsigned, status>(index, OK);
+			return std::tuple<unsigned, status>(index, eds_m::OK);
 		}
 	}
-	return std::tuple<unsigned, status>(0, INFEASIBLE);
+	return std::tuple<unsigned, status>(0, eds_m::INFEASIBLE);
 }
 
 template<typename T>
@@ -142,7 +142,7 @@ inline std::tuple<T, status> list<T>::list_delete(unsigned n)
 		head = head->next;
 		T data = holder->data;
 		free(holder);
-		return std::tuple<T, status>(data, OK);
+		return std::tuple<T, status>(data, eds_m::OK);
 	}
 	else {
 		for (unsigned i = 0; i < n - 1; i++) {
@@ -152,7 +152,7 @@ inline std::tuple<T, status> list<T>::list_delete(unsigned n)
 		cur->next = holder->next;
 		T data = holder->data;
 		free(holder);
-		return std::tuple<T, status>(data, OK);
+		return std::tuple<T, status>(data, eds_m::OK);
 	}
 	//uncomplete
 }

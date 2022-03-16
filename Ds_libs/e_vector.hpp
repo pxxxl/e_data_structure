@@ -10,37 +10,61 @@ constexpr double EXPAND_RATE = 1.5;
 template<typename T>
 class vector {
 public:
-	 //初始化vector
-	 vector();
-	 //清除线性表的数据（不清除分配的空间）
-	 void clear_list() noexcept;
-	 //返回list是否为空
-	 bool list_empty() const noexcept;
-	 //返回list长度
-	 unsigned list_length() const noexcept;
-	 //获取线性表的元素
-	 T& get_item(unsigned) const;
-	 //返回list中第一个与传入元素满足compare关系的元素的序号，调用时，func(传入的元素, list中元素)
-	 std::tuple<unsigned, status> locate_item(const T&, std::function<bool(const T&, const T&)>) const noexcept;
-	 //返回给定元素的前驱
-	 std::tuple<T&, status> prior_item(const T&) const noexcept;
-	 //返回给定元素的后继
-	 std::tuple<T&, status> next_item(const T&) const noexcept;
-	 //将元素插入到某位置上
-	 void list_insert(T, unsigned);
-	 //删除给定位置上的元素（错了，不该传引用）
-	 std::tuple<T&, status> list_delete(unsigned);
-	 //对list的每个对象调用传入的函数
-	 void list_traverse(std::function<void(T&)>) noexcept;
-	 //尾插入
-	 void push_back(T);
-	 //析构
-	 ~vector();
+	vector(std::initializer_list<T> list);
+	vector();
+
+	//clear the data in the linear list
+	void clear_list() noexcept;
+
+	//if the list is empty, return false
+	bool list_empty() const noexcept;
+
+	//return the length of the list
+	unsigned list_length() const noexcept;
+
+	//get the Lvalue reference of the linear list
+	//make sure len > n >= 0
+	T& get_item(unsigned n) const;
+
+	//find the first element causing func(sample, tested) to return true, and return its serial number.
+	//status == eds_m::OK  :  founded
+	//status == eds_m::INFEASIBLE  :  not found
+	std::tuple<unsigned, status> locate_item(const T& sample, std::function<bool(const T& sample, const T& tested)> func) const ;
+
+	//return the former element of the sample
+	//status == eds_m::OK  :  founded
+	//status == eds_m::INFEASIBLE  :  not found
+	std::tuple<T&, status> prior_item(const T& sample) const noexcept;
+
+	//return the latter element of the sample
+	//status == eds_m::OK  :  founded
+	//status == eds_m::INFEASIBLE  :  not found
+	std::tuple<T&, status> next_item(const T& sample) const noexcept;
+
+	//insert the element to linear_list[n]
+	//make sure len >= n >= 0
+	void list_insert(T inserted, unsigned n);
+
+	//delete the element linear_list[n]
+	//make sure len > n >= 0
+	void list_delete(unsigned n);
+
+	//call func(element) on each element in the linear list
+	void list_traverse(std::function<void(T& element)> func);
+
+	//insert the element to the tail of the linear list
+	void push_back(T inserted);
+
+	//insert the element to the head of the linear list
+	void insert_front(T inserted);
+
+	//destructor
+	~vector();
 private:
 	unsigned cap = 0;
 	unsigned len = 0;
 	T* head = nullptr;
-	T n_obj;
+	T& n_obj;
 
 	vector(const vector&);
 
@@ -48,7 +72,7 @@ private:
 //声明结束
 
 template<typename T>
-vector<T>::vector() {
+vector<T>::vector():n_obj((T&)eds_m::null_class()) {
 	head = new T[INIT_SIZE];
 	if (head == nullptr) {
 		throw std::runtime_error("from vector() : cannot alloc memory");
@@ -56,6 +80,21 @@ vector<T>::vector() {
 	}
 	cap = INIT_SIZE;
 	len = 0;
+	return;
+}
+
+template<typename T>
+inline vector<T>::vector(std::initializer_list<T> list):n_obj((T&)eds_m::null_class())
+{
+	head = new T[list.size()];
+	auto be = list.begin();
+	auto en = list.end();
+	for (int i = 0; be != en;) {
+		head[i] = *be;
+		be++;
+	}
+	cap = list.size();
+	len = list.size();
 	return;
 }
 
@@ -83,53 +122,54 @@ inline unsigned vector<T>::list_length() const noexcept {
 template<typename T>
 inline T& vector<T>::get_item(unsigned n) const{
 	if (n >= len) {
-		throw std::out_of_range("from vector::get_item : n >= len");
+		throw std::out_of_range("From eds::vector::get_item : n >= len");
 	}
 	if (n < len && n >= 0) {
 		return head[n];
 	}
+	return n_obj;
 }
 
 template<typename T>
-inline std::tuple<unsigned, status> vector<T>::locate_item(const T& sample, std::function<bool(const T&, const T&)> func) const noexcept{
-	for (unsigned i = 0, bool ok = false; i < len; i++) {
+inline std::tuple<unsigned, status> vector<T>::locate_item(const T& sample, std::function<bool(const T&, const T&)> func) const {
+	for (unsigned i = 0; i < len; i++) {
 		if (func(sample, head[i])) {
-			return std::tuple(i, OK);
+			return std::tuple(i, eds_m::OK);
 		}
 	}
-	return std::tuple(0u, INFEASIBLE);
+	return std::tuple(0u, eds_m::INFEASIBLE);
 }
 
 template<typename T>
 inline std::tuple<T&, status> vector<T>::prior_item(const T& sample) const noexcept {
 	if (len == 0) {
-		return std::tie(n_obj, INFEASIBLE);
+		return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
 	}
 	if (sample == (head)[0]) {
-		return std::tuple(n_obj, INFEASIBLE);
+		return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
 	}
 	for (unsigned i = 1; i < len; i++) {
 		if (sample == (head)[i]) {
-			return std::tuple(head[i - 1], INFEASIBLE);
+			return std::tuple<T&, status>(head[i - 1], eds_m::INFEASIBLE);
 		}
 	}
-	return std::tuple(n_obj, INFEASIBLE);
+	return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
 }
 
 template<typename T>
-inline std::tuple<T&, status> vector<T>::next_item(const T& sample) const{
+inline std::tuple<T&, status> vector<T>::next_item(const T& sample) const noexcept{
 	if (len == 0) {
-		return std::nullopt;
+		return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
 	}
 	if (sample == head[this->len - 1]) {
-		return std::nullopt;
+		return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
 	}
 	for (unsigned i = 0; i < len - 1; i++) {
 		if (sample == head[i]) {
-			return head[i + 1];
+			return std::tuple<T&, status>(head[i + 1], eds_m::OK);
 		}
 	}
-	return std::nullopt;
+	return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
 }
 
 template<typename T>
@@ -161,30 +201,38 @@ inline void vector<T>::list_insert(T sample, unsigned n){
 }
 
 template<typename T>
-inline std::tuple<T&, status> vector<T>::list_delete(unsigned n)
+inline void vector<T>::list_delete(unsigned n)
 {
 	if (n >= len || n < 0) {
-		return std::nullopt;
+		return;
 	}
 	T& copy = head[n];
 	for (unsigned i = n; i < len - 1; i++) {
 		head[i] = head[i + 1];
 	}
 	len--;
-	return copy;
+	return;
 }
 
 template<typename T>
-inline void vector<T>::list_traverse(std::function<bool(T&)> func)
+inline void vector<T>::list_traverse(std::function<void(T& element)> func)
 {
-	bool state;
 	for (unsigned i = 0; i < len; i++) {
-		state = func(head[i]);
-		if (state != true) {
-			throw std::runtime_error("from vector::list_traverse : function returns false");
-		}
+		func(head[i]);
 	}
 	return;
+}
+
+template<typename T>
+inline void vector<T>::push_back(T inserted)
+{
+	list_insert(inserted, len);
+}
+
+template<typename T>
+inline void vector<T>::insert_front(T inserted)
+{
+	list_insert(inserted, 0);
 }
 
 template<typename T>
