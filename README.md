@@ -3,7 +3,7 @@
 
 随课程进度更新
 
-[前往源码下载界面](github.com/pxxxl/e_data_structure/releases)
+[前往源码下载界面](https://github.com/pxxxl/e_data_structure/releases/tag/v1.1.2)
 
 ## 进度：
 
