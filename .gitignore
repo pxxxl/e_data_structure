@@ -365,3 +365,9 @@ FodyWeavers.xsd
 # Personnal ignore
 test.cpp
 unitTest/
+Debug/
+Ds_libs.sln
+Ds_libs/Debug
+Ds_libs/Ds_libs.vcxproj
+Ds_libs/Ds_libs.vcxproj.user
+Ds_libs/Ds_libs.vcxproj.filters

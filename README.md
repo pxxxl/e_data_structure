@@ -3,11 +3,23 @@
 
 随课程进度更新
 
-下载源码：右边release
+[下载包]{https://github.com/pxxxl/e_data_structure/releases}
 
-进度：
+## 进度：
 
-0.设定              文件: settings.hpp
+**设定(settings.hpp)**
 
-1.线性表——数组实现   文件: e_vector.hpp
+**线性表--接口(interface_linear_list.hpp)**
+
+* 线性表--数组实现(e_vector.hpp)
+
+* 线性表--单链表实现(*e_list.hpp*)(未完成)
+
+**栈--接口(interface_stack.hpp)**
+
+* 栈--单链表实现(e_stack.hpp)
+
+**矩阵**
+
+* 矩阵(*matrix.hpp*)(未完成)
 
