@@ -5,7 +5,7 @@
 namespace eds {
 
 template<typename T>
-class queue {
+class intf_queue {
 public:
 	//clear the queue
 	virtual void clear_queue() noexcept = 0;
@@ -29,6 +29,6 @@ public:
 	virtual void stack_traverse(std::function<void(T& element)> func) = 0;
 
 	//destructor
-	virtual ~queue() {};
+	virtual ~intf_queue() {};
 };
 }

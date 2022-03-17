@@ -18,7 +18,7 @@ public:
 	//清除线性表的数据
 	void clear_list() noexcept;
 	//返回list是否为空
-	bool list_empty() const noexcept;
+	bool is_not_empty() const noexcept;
 	//返回list长度
 	unsigned list_length() const noexcept;
 	//获取线性表的元素
@@ -53,7 +53,7 @@ private:
 
 
 template<typename T>
-inline bool list<T>::list_empty() const noexcept
+inline bool list<T>::is_not_empty() const noexcept
 {
 	if (head == nullptr) {
 		return false;
@@ -88,10 +88,10 @@ inline std::tuple<unsigned, status> list<T>::locate_item(const T& sample, std::f
 	for (l_node<T>* cur = head; cur != nullptr; cur = cur->next, index++) {
 		flag = func(sample, cur->data);
 		if (flag == true) {
-			return std::tuple<unsigned, status>(index, eds_m::OK);
+			return std::tuple<unsigned, status>(index, OK);
 		}
 	}
-	return std::tuple<unsigned, status>(0, eds_m::INFEASIBLE);
+	return std::tuple<unsigned, status>(0, INFEASIBLE);
 }
 
 template<typename T>
@@ -142,7 +142,7 @@ inline std::tuple<T, status> list<T>::list_delete(unsigned n)
 		head = head->next;
 		T data = holder->data;
 		free(holder);
-		return std::tuple<T, status>(data, eds_m::OK);
+		return std::tuple<T, status>(data, OK);
 	}
 	else {
 		for (unsigned i = 0; i < n - 1; i++) {
@@ -152,7 +152,7 @@ inline std::tuple<T, status> list<T>::list_delete(unsigned n)
 		cur->next = holder->next;
 		T data = holder->data;
 		free(holder);
-		return std::tuple<T, status>(data, eds_m::OK);
+		return std::tuple<T, status>(data, OK);
 	}
 	//uncomplete
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include"settings.hpp"
+#include"interface_linear_list.hpp"
 
 namespace eds {
 
@@ -8,7 +9,7 @@ constexpr unsigned INIT_SIZE = 4;
 constexpr double EXPAND_RATE = 1.5;
 
 template<typename T>
-class vector {
+class vector : public intf_linear_list<T>{
 public:
 	vector(std::initializer_list<T> list);
 	vector();
@@ -16,8 +17,8 @@ public:
 	//clear the data in the linear list
 	void clear_list() noexcept;
 
-	//if the list is empty, return false
-	bool list_empty() const noexcept;
+	//if the list is not empty, return true
+	bool is_not_empty() const noexcept;
 
 	//return the length of the list
 	unsigned list_length() const noexcept;
@@ -27,18 +28,18 @@ public:
 	T& get_item(unsigned n) const;
 
 	//find the first element causing func(sample, tested) to return true, and return its serial number.
-	//status == eds_m::OK  :  founded
-	//status == eds_m::INFEASIBLE  :  not found
+	//status == OK  :  founded
+	//status == INFEASIBLE  :  not found
 	std::tuple<unsigned, status> locate_item(const T& sample, std::function<bool(const T& sample, const T& tested)> func) const ;
 
 	//return the former element of the sample
-	//status == eds_m::OK  :  founded
-	//status == eds_m::INFEASIBLE  :  not found
+	//status == OK  :  founded
+	//status == INFEASIBLE  :  not found
 	std::tuple<T&, status> prior_item(const T& sample) const noexcept;
 
 	//return the latter element of the sample
-	//status == eds_m::OK  :  founded
-	//status == eds_m::INFEASIBLE  :  not found
+	//status == OK  :  founded
+	//status == INFEASIBLE  :  not found
 	std::tuple<T&, status> next_item(const T& sample) const noexcept;
 
 	//insert the element to linear_list[n]
@@ -58,6 +59,8 @@ public:
 	//insert the element to the head of the linear list
 	void insert_front(T inserted);
 
+	T& operator[](unsigned n) { return get_item(n); }
+
 	//destructor
 	~vector();
 private:
@@ -72,7 +75,7 @@ private:
 //ÉùÃ÷½áÊø
 
 template<typename T>
-vector<T>::vector():n_obj((T&)eds_m::null_class()) {
+inline vector<T>::vector():n_obj((T&)eds_m::null_class()) {
 	head = new T[INIT_SIZE];
 	if (head == nullptr) {
 		throw std::runtime_error("from vector() : cannot alloc memory");
@@ -86,15 +89,19 @@ vector<T>::vector():n_obj((T&)eds_m::null_class()) {
 template<typename T>
 inline vector<T>::vector(std::initializer_list<T> list):n_obj((T&)eds_m::null_class())
 {
+	len = list.size();
+	cap = list.size();
+	if (len == 0) {
+		vector();
+		return;
+	}
 	head = new T[list.size()];
 	auto be = list.begin();
 	auto en = list.end();
-	for (int i = 0; be != en;) {
+	for (unsigned i = 0; be != en;i++) {
 		head[i] = *be;
 		be++;
 	}
-	cap = list.size();
-	len = list.size();
 	return;
 }
 
@@ -105,7 +112,7 @@ inline void vector<T>::clear_list() noexcept {
 }
 
 template<typename T>
-inline bool vector<T>::list_empty() const noexcept{
+inline bool vector<T>::is_not_empty() const noexcept{
 	if (len == 0) {
 		return false;
 	}
@@ -134,42 +141,42 @@ template<typename T>
 inline std::tuple<unsigned, status> vector<T>::locate_item(const T& sample, std::function<bool(const T&, const T&)> func) const {
 	for (unsigned i = 0; i < len; i++) {
 		if (func(sample, head[i])) {
-			return std::tuple(i, eds_m::OK);
+			return std::tuple(i, OK);
 		}
 	}
-	return std::tuple(0u, eds_m::INFEASIBLE);
+	return std::tuple(0u, INFEASIBLE);
 }
 
 template<typename T>
 inline std::tuple<T&, status> vector<T>::prior_item(const T& sample) const noexcept {
 	if (len == 0) {
-		return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
+		return std::tuple<T&, status>(n_obj, INFEASIBLE);
 	}
 	if (sample == (head)[0]) {
-		return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
+		return std::tuple<T&, status>(n_obj, INFEASIBLE);
 	}
 	for (unsigned i = 1; i < len; i++) {
 		if (sample == (head)[i]) {
-			return std::tuple<T&, status>(head[i - 1], eds_m::INFEASIBLE);
+			return std::tuple<T&, status>(head[i - 1], OK);
 		}
 	}
-	return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
+	return std::tuple<T&, status>(n_obj, INFEASIBLE);
 }
 
 template<typename T>
 inline std::tuple<T&, status> vector<T>::next_item(const T& sample) const noexcept{
 	if (len == 0) {
-		return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
+		return std::tuple<T&, status>(n_obj, INFEASIBLE);
 	}
 	if (sample == head[this->len - 1]) {
-		return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
+		return std::tuple<T&, status>(n_obj, INFEASIBLE);
 	}
 	for (unsigned i = 0; i < len - 1; i++) {
 		if (sample == head[i]) {
-			return std::tuple<T&, status>(head[i + 1], eds_m::OK);
+			return std::tuple<T&, status>(head[i + 1], OK);
 		}
 	}
-	return std::tuple<T&, status>(n_obj, eds_m::INFEASIBLE);
+	return std::tuple<T&, status>(n_obj, INFEASIBLE);
 }
 
 template<typename T>

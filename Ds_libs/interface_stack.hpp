@@ -5,7 +5,7 @@
 namespace eds {
 
 template<typename T>
-class stack {
+class intf_stack {
 public:
 	//clear the stack
 	virtual void clear_stack() noexcept = 0;
@@ -29,7 +29,7 @@ public:
 	virtual void stack_traverse(std::function<void(T& element)> func) = 0;
 
 	//destructor
-	virtual ~stack() {};
+	virtual ~intf_stack() {};
 };
 
 }

@@ -5,13 +5,13 @@
 namespace eds {
 
 template<typename T>
-class linear_list {
+class intf_linear_list {
 public:
 	//clear the data in the linear list
 	virtual void clear_list() noexcept = 0;
 
-	//if the list is empty, return false
-	virtual bool list_empty() const noexcept = 0;
+	//if the list is not empty, return true
+	virtual bool is_not_empty() const noexcept = 0;
 
 	//return the length of the list
 	virtual unsigned list_length() const noexcept = 0;
@@ -21,18 +21,18 @@ public:
 	virtual T& get_item(unsigned n) const = 0;
 
 	//find the first element causing func(sample, tested) to return true, and return its serial number.
-	//status == eds_m::OK  :  founded
-	//status == eds_m::INFEASIBLE  :  not found
+	//status == OK  :  founded
+	//status == INFEASIBLE  :  not found
 	virtual std::tuple<unsigned, status> locate_item(const T& sample, std::function<bool(const T& sample, const T& tested)> func) const = 0;
 
 	//return the former element of the sample
-	//status == eds_m::OK  :  founded
-	//status == eds_m::INFEASIBLE  :  not found
+	//status == OK  :  founded
+	//status == INFEASIBLE  :  not found
 	virtual std::tuple<T&, status> prior_item(const T& sample) const noexcept = 0;
 
 	//return the latter element of the sample
-	//status == eds_m::OK  :  founded
-	//status == eds_m::INFEASIBLE  :  not found
+	//status == OK  :  founded
+	//status == INFEASIBLE  :  not found
 	virtual std::tuple<T&, status> next_item(const T& sample) const noexcept = 0;
 
 	//insert the element to linear_list[n]
@@ -52,8 +52,10 @@ public:
 	//insert the element to the head of the linear list
 	virtual void insert_front(T inserted) = 0;
 
+	virtual T& operator[](unsigned n) = 0;
+
 	//destructor
-	virtual ~linear_list() {};
+	virtual ~intf_linear_list() {};
 };
 
 }

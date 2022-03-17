@@ -12,7 +12,7 @@ struct stack_node {
 };
 
 template<typename T>
-class l_stack : public stack<T> {
+class l_stack : public intf_stack<T> {
 public:
 	l_stack(std::initializer_list<T> list);
 	l_stack() = default;

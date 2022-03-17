@@ -30,7 +30,7 @@
     <ClInclude Include="e_stack.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="matrix.hpp">
+    <ClInclude Include="e_matrix.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="interface_linear_list.hpp">
