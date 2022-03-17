@@ -128,8 +128,8 @@ inline unsigned vector<T>::list_length() const noexcept {
 
 template<typename T>
 inline T& vector<T>::get_item(unsigned n) const{
-	if (n >= len) {
-		throw std::out_of_range("From eds::vector::get_item : n >= len");
+	if (n > len) {
+		throw std::out_of_range("From eds::vector::get_item : n > len");
 	}
 	if (n < len && n >= 0) {
 		return head[n];
@@ -152,9 +152,6 @@ inline std::tuple<T&, status> vector<T>::prior_item(const T& sample) const noexc
 	if (len == 0) {
 		return std::tuple<T&, status>(n_obj, INFEASIBLE);
 	}
-	if (sample == (head)[0]) {
-		return std::tuple<T&, status>(n_obj, INFEASIBLE);
-	}
 	for (unsigned i = 1; i < len; i++) {
 		if (sample == (head)[i]) {
 			return std::tuple<T&, status>(head[i - 1], OK);
@@ -168,9 +165,6 @@ inline std::tuple<T&, status> vector<T>::next_item(const T& sample) const noexce
 	if (len == 0) {
 		return std::tuple<T&, status>(n_obj, INFEASIBLE);
 	}
-	if (sample == head[this->len - 1]) {
-		return std::tuple<T&, status>(n_obj, INFEASIBLE);
-	}
 	for (unsigned i = 0; i < len - 1; i++) {
 		if (sample == head[i]) {
 			return std::tuple<T&, status>(head[i + 1], OK);
@@ -181,29 +175,35 @@ inline std::tuple<T&, status> vector<T>::next_item(const T& sample) const noexce
 
 template<typename T>
 inline void vector<T>::list_insert(T sample, unsigned n){
-	if (n >= len) {
-		throw std::out_of_range("from vector::list_insert : n >= len");
+	if (n > len) {
+		throw std::out_of_range("from vector::list_insert : n > len");
 	}
 	if (len == cap) {
-		unsigned new_cap = cap * EXPAND_RATE;
+		unsigned new_cap = static_cast<unsigned>(cap * EXPAND_RATE);
 		if (new_cap < cap) {
 			throw std::overflow_error("from vector::list_insert : multiple overflow");
 		}
 		T* new_head = new T[new_cap];
+		handle_memory_alloc(new_head);
 		for (unsigned i = len - 1; i >= n; i--) {
 			new_head[i + 1] = head[i];
 		}
 		new_head[n] = sample;
-		for (unsigned i = n - 1; i < 0; i--) {
+		for (unsigned i = n - 1; i > 0; i--) {
 			new_head[i] = head[i];
 		}
+		new_head[0] = head[0];
+		delete[] head;
+		head = new_head;
+		cap = new_cap;
 	}
 	else {
-		for (unsigned i = len; i <= n; i--) {
+		for (unsigned i = len; i > n; i--) {
 			head[i] = head[i - 1];
 		}
 		head[n] = sample;
 	}
+	len++;
 	return;
 }
 

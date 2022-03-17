@@ -27,6 +27,7 @@
     <ClInclude Include="interface_queue.hpp" />
     <ClInclude Include="interface_stack.hpp" />
     <ClInclude Include="e_matrix.hpp" />
+    <ClInclude Include="interface_iterator.hpp" />
     <ClInclude Include="settings.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

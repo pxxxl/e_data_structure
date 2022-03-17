@@ -3,13 +3,20 @@
 #include"settings.hpp"
 
 namespace eds {
+
+template<typename T>
+class matrix;
+
+template<typename T>
+matrix<T> unit_matrix(unsigned line);
+
 template<typename T>
 class matrix{
 public:
 	matrix() : line(line), column(column) {};
 	matrix(unsigned line, unsigned column) : line(line), column(column){};
 	matrix(unsigned line, unsigned column, std::initializer_list<T> list) : line(line), column(column) {
-		assert(line * column < list.size());
+		assert(line * column >= list.size());
 		data = new T[line * column];
 		handle_memory_alloc(data);
 		auto be = list.begin();
@@ -17,10 +24,10 @@ public:
 		for (unsigned i = 0; i < line; i++) {
 			for (unsigned j = 0; j < column; j++) {
 				if (be == en) {
-					data[i * line + j] = 0;
+					data[i * column + j] = 0;
 				}
 				else {
-					data[i * line + j] = *be;
+					data[i * column + j] = *be;
 					be++;
 				}
 			}
@@ -81,6 +88,9 @@ public:
 
 	//number multiply self
 	void num_multiply_self(const T& num) const;
+
+	//print the matrix itself(only int)
+	void print_mat() const noexcept;
 
 private:
 	const unsigned line;
@@ -322,6 +332,19 @@ inline void matrix<T>::num_multiply_self(const T& num) const
 		}
 	}
 	return;
+}
+
+template<typename T>
+inline void matrix<T>::print_mat() const noexcept
+{
+	std::cout << "Matrix : " << std::endl;
+	for (unsigned i = 0; i < get_line(); i++) {
+		for (unsigned j = 0; j < get_column(); j++) {
+			printf("%-5d", get(i, j));
+		}
+		std::cout << std::endl;
+		std::cout << std::endl;
+	}
 }
 
 

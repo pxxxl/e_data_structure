@@ -180,10 +180,7 @@ inline std::tuple<T&, status> d_list<T>::prior_item(const T& sample) const noexc
 	if (len == 0) {
 		return std::tuple<T&, status>(n_obj, INFEASIBLE);
 	}
-	if (sample == head->data) {
-		return std::tuple<T&, status>(n_obj, INFEASIBLE);
-	}
-	auto cur = head;
+	auto cur = head ->next;
 	for (; cur != nullptr;cur = cur->next) {
 		if (sample == cur->data) {
 			return std::tuple<T&, status>(cur->prior->data, OK);
@@ -198,10 +195,7 @@ inline std::tuple<T&, status> d_list<T>::next_item(const T& sample) const noexce
 	if (len == 0) {
 		return std::tuple<T&, status>(n_obj, INFEASIBLE);
 	}
-	if (sample == tail->data) {
-		return std::tuple<T&, status>(n_obj, INFEASIBLE);
-	}
-	auto cur = tail;
+	auto cur = tail->prior;
 	for (; cur != nullptr; cur = cur->prior) {
 		if (sample == cur->data) {
 			return std::tuple<T&, status>(cur->next->data, OK);

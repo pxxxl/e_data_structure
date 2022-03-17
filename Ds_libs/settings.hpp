@@ -5,6 +5,7 @@
 #include<optional>
 #include<assert.h>
 #include<stdexcept>
+#include<stdio.h>
 
 namespace eds_m {
 	constexpr int TRUE = 1;
