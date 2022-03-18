@@ -20,14 +20,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="e_d_list.hpp" />
+    <ClInclude Include="e_d_list_iterator.hpp" />
     <ClInclude Include="e_list.hpp" />
     <ClInclude Include="e_stack.hpp" />
     <ClInclude Include="e_vector.hpp" />
+    <ClInclude Include="e_vector_iterator.hpp" />
     <ClInclude Include="interface_linear_list.hpp" />
     <ClInclude Include="interface_queue.hpp" />
     <ClInclude Include="interface_stack.hpp" />
     <ClInclude Include="e_matrix.hpp" />
     <ClInclude Include="interface_iterator.hpp" />
+    <ClInclude Include="interface_string.hpp" />
     <ClInclude Include="settings.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

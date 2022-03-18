@@ -2,11 +2,15 @@
 
 #include"settings.hpp"
 #include"interface_linear_list.hpp"
+#include"e_vector_iterator.hpp"
 
 namespace eds {
 
 constexpr unsigned INIT_SIZE = 4;
 constexpr double EXPAND_RATE = 1.5;
+
+template<typename T>
+class vector_iterator;
 
 template<typename T>
 class vector : public intf_linear_list<T>{
@@ -59,7 +63,18 @@ public:
 	//insert the element to the head of the linear list
 	void insert_front(T inserted);
 
+	//print the list to the console
+	void print_linear_list(std::ostream& out) const noexcept;
+
+	//get the iterator at the beginning of the linear list
+	vector_iterator<T> begin() const noexcept;
+	
+	//get the iterator at the ending of the linear list
+	vector_iterator<T> end() const noexcept;
+
 	T& operator[](unsigned n) { return get_item(n); }
+
+	friend std::ostream& operator<<(std::ostream& out, const vector<T>& sample) { sample.print_linear_list(out); return out; }
 
 	//destructor
 	~vector();
@@ -240,6 +255,27 @@ template<typename T>
 inline void vector<T>::insert_front(T inserted)
 {
 	list_insert(inserted, 0);
+}
+
+template<typename T>
+inline void vector<T>::print_linear_list(std::ostream& out) const noexcept
+{
+	for (unsigned i = 0; i < len; i++) {
+		out << head[i] << " ";
+	}
+	out << std::endl;
+}
+
+template<typename T>
+inline vector_iterator<T> vector<T>::begin() const noexcept {
+	vector_iterator<T> ite(0u, this);
+	return ite;
+}
+
+template<typename T>
+inline vector_iterator<T> vector<T>::end() const noexcept {
+	vector_iterator<T> ite(len, this);
+	return ite;
 }
 
 template<typename T>

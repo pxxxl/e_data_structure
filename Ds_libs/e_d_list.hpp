@@ -3,6 +3,7 @@
 #include"settings.hpp"
 #include"interface_linear_list.hpp"
 
+
 namespace eds {
 template<typename T>
 struct d_node {
@@ -62,7 +63,20 @@ public:
 	//insert the element to the head of the linear list
 	void insert_front(T inserted);
 
+	//print the list to the console
+	void print_linear_list(std::ostream& out) const noexcept;
+
+	//get the iterator at the beginning of the linear list
+	//d_list_iterator<T> begin() const noexcept;
+
+	//get the iterator at the ending of the linear list
+	//d_list_iterator<T> end() const noexcept;
+
+	friend std::ostream& operator<<(std::ostream& out, const d_list<T>& sample) { sample.print_linear_list(out); return out; }
+
 	T& operator[](unsigned n) { return get_item(n); }
+
+	//friend class d_list_iterator<T>;
 
 	//destructor
 	~d_list();
@@ -213,6 +227,14 @@ inline void d_list<T>::list_insert(T inserted, unsigned n)
 	if (n <= len / 2) {
 		//从头开始
 		if (n == 0) {
+			if (len == 0) {
+				head = new d_node<T>;
+				handle_memory_alloc(head);
+				head->next = nullptr;
+				head->prior = nullptr;
+				tail = head;
+				head->data = inserted;
+			}
 			head->prior = new d_node<T>;
 			handle_memory_alloc(head->prior);
 			head->prior->next = head;
@@ -328,6 +350,30 @@ inline void d_list<T>::insert_front(T inserted)
 {
 	list_insert(inserted, 0);
 }
+
+template<typename T>
+inline void d_list<T>::print_linear_list(std::ostream& out) const noexcept
+{
+	d_node<T>* cur = head;
+	for (; cur != nullptr; cur = cur->next) {
+		std::cout << cur->data << " ";
+	}
+	return;
+}
+
+//template<typename T>
+//inline d_list_iterator<T> d_list<T>::begin() const noexcept
+//{
+//	d_list_iterator<T> ite(0u, this);
+//	return ite;
+//}
+
+//template<typename T>
+//inline d_list_iterator<T> d_list<T>::end() const noexcept
+//{
+//	d_list_iterator<T> ite(len, this);
+//	return ite;
+//}
 
 template<typename T>
 inline d_list<T>::~d_list()

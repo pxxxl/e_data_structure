@@ -45,5 +45,14 @@
     <ClInclude Include="interface_iterator.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="interface_string.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="e_vector_iterator.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="e_d_list_iterator.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

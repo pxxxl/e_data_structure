@@ -26,7 +26,7 @@ public:
 	virtual T de_queue() = 0;
 
 	//call func(element) on each elements in the queue
-	virtual void stack_traverse(std::function<void(T& element)> func) = 0;
+	virtual void queue_traverse(std::function<void(T& element)> func) = 0;
 
 	//destructor
 	virtual ~intf_queue() {};

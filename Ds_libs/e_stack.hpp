@@ -69,7 +69,7 @@ inline void l_stack<T>::clear_stack() noexcept
 	auto prior = top_cur;
 	for (; prior != nullptr;) {
 		prior = prior->under;
-		free(top_cur);
+		delete top_cur;
 		top_cur = prior;
 	}
 	size = 0;
@@ -122,7 +122,7 @@ inline T l_stack<T>::pop()
 	top_cur = top_cur->under;
 	size--;
 	T ref = holder->data;
-	free(holder);
+	delete holder;
 	return ref;
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include"settings.hpp"
+#include"interface_iterator.hpp"
 
 namespace eds {
 
@@ -51,6 +52,12 @@ public:
 
 	//insert the element to the head of the linear list
 	virtual void insert_front(T inserted) = 0;
+
+	//print the list to the console
+	virtual void print_linear_list(std::ostream& out) const noexcept = 0;
+
+	//get the iterator at the beginning of the linear list
+	//get the iterator at the ending of the linear list
 
 	virtual T& operator[](unsigned n) = 0;
 
