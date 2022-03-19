@@ -79,8 +79,22 @@ namespace eds {
 	{
 		return false;
 	}
+	inline bool is_zero(double a) {
+		if (a > -10E-6 && a < 10E-6) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
-
+	template<typename T>
+	inline void swap(T& a, T& b) {
+		T hold = a;
+		a = b;
+		b = hold;
+		return;
+	}
 }
 
 

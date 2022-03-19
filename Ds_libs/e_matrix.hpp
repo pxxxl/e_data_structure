@@ -8,6 +8,9 @@ template<typename T>
 class matrix;
 
 template<typename T>
+void print_mat_decimal(matrix<T> mat);
+
+template<typename T>
 matrix<T> unit_matrix(unsigned line);
 
 template<typename T>
@@ -80,6 +83,9 @@ public:
 
 	//get the adjoint of the matrix
 	matrix adjoint() const;
+
+	//get the standard form of the matrix
+	matrix std_line_form() const;
 
 	//get the copy of the matrix
 	matrix copy() const;
@@ -244,6 +250,65 @@ inline matrix<T> eds::matrix<T>::adjoint() const
 	return inversition()*det();
 }
 
+//the method below is complex enough to force me adding some notes 
+template<typename T>
+inline matrix<T> matrix<T>::std_line_form() const
+{
+	static_assert(is_decimal<T>(T()), "make sure T is demical before calling std_line_form");
+	matrix<T> sample = copy();
+	unsigned cur_line = 0;
+	unsigned cur_column = 0;
+	T holder = 0;
+	unsigned hold_line = 0;
+	bool flag = true;
+
+	//if cursor is out of bound, transfer has completed, then return the result
+	while(cur_line < line && cur_column < column) {
+		//if cursor element is zero, check its elements below
+		if (is_zero(sample.data[cur_line][cur_column])) {
+			flag = false;
+			for (unsigned below = cur_line; below < line; below++) {
+				if (!is_zero(sample.data[below][cur_column])) {
+					flag = true;
+					hold_line = below;
+					break;
+				}
+			}
+			//one of the elements below is not zero, then swap the two line
+			if (flag == true) {
+				for (unsigned i = 0; i < column; i++) {
+					swap<T>(sample.data[hold_line][i], sample.data[cur_line][i]);
+				}
+			}
+			//cursor's below elements are all zero, then cursor move to its right
+			else {
+				cur_column++;
+			}
+		}
+		//if cursor element is not zero, turn it to 1, and clear all the element in this column
+		else {
+			for (unsigned i = cur_column; i < column; i++) {
+				sample.data[cur_line][i] /= sample.data[cur_line][cur_column];
+			}
+			for (unsigned i = 0; i < cur_line; i++) {
+				holder = sample.data[i][cur_column];
+				for (unsigned j = cur_column; j < column; j++) {
+					sample.data[i][j] -= sample.data[cur_column][j] * holder;
+				}
+			}
+			for (unsigned i = cur_line + 1; i < line; i++) {
+				holder = sample.data[i][cur_column];
+				for (unsigned j = cur_column; j < column; j++) {
+					sample.data[i][j] -= sample.data[cur_column][j] * holder;
+				}
+			}
+			cur_column++;
+			cur_line++;
+		}
+	}
+	return sample;
+}
+
 template<typename T>
 inline matrix<T> matrix<T>::copy() const
 {
@@ -368,7 +433,7 @@ inline void matrix<long>::print_mat() const noexcept
 	std::cout << "Matrix : " << std::endl;
 	for (unsigned i = 0; i < get_line(); i++) {
 		for (unsigned j = 0; j < get_column(); j++) {
-			printf("%-5ld", get(i, j));
+			printf("%-5ld  ", get(i, j));
 		}
 		std::cout << std::endl;
 		std::cout << std::endl;
@@ -380,7 +445,7 @@ inline void matrix<int>::print_mat() const noexcept
 	std::cout << "Matrix : " << std::endl;
 	for (unsigned i = 0; i < get_line(); i++) {
 		for (unsigned j = 0; j < get_column(); j++) {
-			printf("%-5d", get(i, j));
+			printf("%-5d  ", get(i, j));
 		}
 		std::cout << std::endl;
 		std::cout << std::endl;
@@ -392,7 +457,7 @@ inline void matrix<long long>::print_mat() const noexcept
 	std::cout << "Matrix : " << std::endl;
 	for (unsigned i = 0; i < get_line(); i++) {
 		for (unsigned j = 0; j < get_column(); j++) {
-			printf("%-5lld", get(i, j));
+			printf("%-5lld  ", get(i, j));
 		}
 		std::cout << std::endl;
 		std::cout << std::endl;
@@ -404,7 +469,7 @@ inline void matrix<short>::print_mat() const noexcept
 	std::cout << "Matrix : " << std::endl;
 	for (unsigned i = 0; i < get_line(); i++) {
 		for (unsigned j = 0; j < get_column(); j++) {
-			printf("%-5d", get(i, j));
+			printf("%-5d  ", get(i, j));
 		}
 		std::cout << std::endl;
 		std::cout << std::endl;
@@ -416,7 +481,7 @@ inline void matrix<double>::print_mat() const noexcept
 	std::cout << "Matrix : " << std::endl;
 	for (unsigned i = 0; i < get_line(); i++) {
 		for (unsigned j = 0; j < get_column(); j++) {
-			printf("%6.2f", get(i, j));
+			printf("%6.2f  ", get(i, j));
 		}
 		std::cout << std::endl;
 		std::cout << std::endl;
@@ -428,7 +493,7 @@ inline void matrix<float>::print_mat() const noexcept
 	std::cout << "Matrix : " << std::endl;
 	for (unsigned i = 0; i < get_line(); i++) {
 		for (unsigned j = 0; j < get_column(); j++) {
-			printf("%-6.3f", get(i, j));
+			printf("%6.2f  ", get(i, j));
 		}
 		std::cout << std::endl;
 		std::cout << std::endl;
@@ -440,7 +505,20 @@ inline void matrix<long double>::print_mat() const noexcept
 	std::cout << "Matrix : " << std::endl;
 	for (unsigned i = 0; i < get_line(); i++) {
 		for (unsigned j = 0; j < get_column(); j++) {
-			printf("%-6.3f", get(i, j));
+			printf("%6.2f  ", get(i, j));
+		}
+		std::cout << std::endl;
+		std::cout << std::endl;
+	}
+}
+
+template<typename T>
+void print_mat_decimal(const matrix<T>* mat)
+{
+	std::cout << "Matrix : " << std::endl;
+	for (unsigned i = 0; i < (*mat).get_line(); i++) {
+		for (unsigned j = 0; j < (*mat).get_column(); j++) {
+			printf("%6.2f  ", (*mat).get(i, j));
 		}
 		std::cout << std::endl;
 		std::cout << std::endl;
@@ -474,4 +552,7 @@ template<typename T>
 inline matrix<T> operator*(const matrix<T>& a, const T& b) {
 	return a.num_multiply(b);
 }
+
+
+
 };
