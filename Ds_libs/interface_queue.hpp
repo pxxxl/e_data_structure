@@ -10,8 +10,8 @@ public:
 	//clear the queue
 	virtual void clear_queue() noexcept = 0;
 
-	//if queue is empty, return false
-	virtual bool queue_empty() const noexcept = 0;
+	//if queue is not empty, return true
+	virtual bool is_not_empty() const noexcept = 0;
 
 	//return the length of the queue
 	virtual unsigned queue_length() const noexcept = 0;

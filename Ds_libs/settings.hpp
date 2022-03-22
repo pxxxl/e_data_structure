@@ -9,8 +9,6 @@
 #include<iostream>
 
 namespace eds_m {
-	constexpr int TRUE = 1;
-	constexpr int FALSE = 0;
 
 	constexpr int FATAL = -1;
 
@@ -18,6 +16,12 @@ namespace eds_m {
 }
 
 namespace eds {
+
+	template<typename T>
+	struct l_node {
+		T data;
+		l_node<T>* next = nullptr;
+	};
 
 	using status = int;
 

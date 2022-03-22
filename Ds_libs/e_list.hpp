@@ -5,12 +5,6 @@
 namespace eds {
 
 template<typename T>
-struct l_node {
-	T data;
-	l_node<T>* next;
-};
-
-template<typename T>
 class list {
 public:
 	//≥ı ºªØlist
